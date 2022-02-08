@@ -13,12 +13,28 @@ function App() {
     fetchTasks()
   }, []);
 
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}  
+
   function fetchTasks (){
     console.log("Fetching...")
     fetch('http://127.0.0.1:8000/api/task-list')
     .then(response => response.json())
     .then(data => 
-      setTodoList(data))
+      setTodoList(data.reverse()))
   }
 
   function handleChange(e){
@@ -36,16 +52,36 @@ function App() {
   function handleSubmit(e){
     e.preventDefault()
     console.log('ITEM:', activeItem)
+    var csrftoken = getCookie('csrftoken')
 
-    const url = "http://127.0.0.1:8000/api/task-create/"
+    var url = "http://127.0.0.1:8000/api/task-create/"
+
+    if(editing == true){
+      url = `http://127.0.0.1:8000/api/task-update/${activeItem.id}/`
+      setEditing(false)
+    }
+
     fetch(url, {
       method:'POST',
       headers:{
         'Content-type':'application/json',
+        'X-CSRFToken':csrftoken,
       },
       body:JSON.stringify(activeItem)
+    }).then((response) => {
+      fetchTasks()
+      setActiveItem({ 
+        id: null, title: '',completed:false
+      })
+    }).catch(function(error){
+      console.log('ERROR:',error)
     })
 
+  }
+
+  function startEdit(task){
+    setActiveItem(task)
+    setEditing(true)
   }
 
   return (
@@ -57,7 +93,7 @@ function App() {
           <form onSubmit={handleSubmit} id="form">
             <div className="flex-wrapper">
               <div style={{flex:6}}>
-                <input onChange={handleChange} className="form-control" id="title" type="text" name="title" placeholder="Add task"/>
+                <input onChange={handleChange} value={activeItem.title} className="form-control" id="title" type="text" name="title" placeholder="Add task"/>
               </div>
                 
               <div style={{flex:1}}>
@@ -74,7 +110,7 @@ function App() {
                   <span>{task.title}</span>
                 </div>
                 <div style={{flex:1}}>  
-                  <button className="btn btn-sm btn-outline-info">Edit</button>
+                  <button onClick={() => startEdit(task)} className="btn btn-sm btn-outline-info">Edit</button>
                 </div>
                 <div style={{flex:1}}>  
                   <button className="btn btn-sm btn-outline-dark delete">X</button>
