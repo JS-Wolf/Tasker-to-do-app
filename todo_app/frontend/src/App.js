@@ -1,23 +1,90 @@
 import logo from './logo.svg';
 import './App.css';
+import React, { useState,useEffect  } from 'react';
 
 function App() {
+  const [todoList, setTodoList] = useState([]);
+  const [activeItem, setActiveItem] = React.useState({ 
+    id: null, title: '',completed:false
+  });
+  const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    fetchTasks()
+  }, []);
+
+  function fetchTasks (){
+    console.log("Fetching...")
+    fetch('http://127.0.0.1:8000/api/task-list')
+    .then(response => response.json())
+    .then(data => 
+      setTodoList(data))
+  }
+
+  function handleChange(e){
+    var name = e.target.name
+    var value = e.target.value
+    console.log('Name:',name)
+    console.log('Value:',value)
+    
+    setActiveItem({
+        ...activeItem,
+        title:value
+    })
+  }
+
+  function handleSubmit(e){
+    e.preventDefault()
+    console.log('ITEM:', activeItem)
+
+    const url = "http://127.0.0.1:8000/api/task-create/"
+    fetch(url, {
+      method:'POST',
+      headers:{
+        'Content-type':'application/json',
+      },
+      body:JSON.stringify(activeItem)
+    })
+
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+     
+    <div className="container">
+      <div id="task-container">
+
+        <div id="form-wrapper">
+          <form onSubmit={handleSubmit} id="form">
+            <div className="flex-wrapper">
+              <div style={{flex:6}}>
+                <input onChange={handleChange} className="form-control" id="title" type="text" name="title" placeholder="Add task"/>
+              </div>
+                
+              <div style={{flex:1}}>
+                <input id="submit" className="btn btn-warning" type="submit" name="Add"/>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div id="list-wrapper">
+          {todoList.map(function(task,index){
+            return(
+              <div key={index} className="task-wrapper flex-wrapper">
+                <div style={{flex:7}}>  
+                  <span>{task.title}</span>
+                </div>
+                <div style={{flex:1}}>  
+                  <button className="btn btn-sm btn-outline-info">Edit</button>
+                </div>
+                <div style={{flex:1}}>  
+                  <button className="btn btn-sm btn-outline-dark delete">X</button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+     
     </div>
   );
 }
