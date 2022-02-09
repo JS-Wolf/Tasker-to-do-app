@@ -96,6 +96,24 @@ function getCookie(name) {
     }).then((response) => { fetchTasks()})
   }
 
+  function strikeUnstrike(task){
+    task.completed = !task.completed
+    console.log('TASK:',task.completed)
+    var csrftoken = getCookie('csrftoken')
+    var url = `http://127.0.0.1:8000/api/task-update/${task.id}/`
+
+    fetch(url, {
+      method:'POST',
+      headers:{
+        'Content-type':'application/json',
+        'X-CSRFToken':csrftoken,
+      },
+      body:JSON.stringify({'completed':task.completed, 'title':task.title})
+    }).then(() => {fetchTasks()})
+
+
+  }
+
   return (
      
     <div className="container">
@@ -118,8 +136,12 @@ function getCookie(name) {
           {todoList.map(function(task,index){
             return(
               <div key={index} className="task-wrapper flex-wrapper">
-                <div style={{flex:7}}>  
-                  <span>{task.title}</span>
+                <div onClick={() => strikeUnstrike(task)} style={{flex:7}}>
+                  {task.completed == false ? (
+                    <span>{task.title}</span>
+                  ) : (
+                    <strike>{task.title}</strike>
+                  )}  
                 </div>
                 <div style={{flex:1}}>  
                   <button onClick={() => startEdit(task)} className="btn btn-sm btn-outline-info">Edit</button>
