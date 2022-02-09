@@ -84,6 +84,18 @@ function getCookie(name) {
     setEditing(true)
   }
 
+  function deleteItem(task){
+    var csrftoken = getCookie('csrftoken')
+
+    fetch( `http://127.0.0.1:8000/api/task-delete/${task.id}/`,{
+      method:'DELETE',
+      headers:{
+        'Content-type':'application/json',
+        'X-CSRFToken':csrftoken,
+      }
+    }).then((response) => { fetchTasks()})
+  }
+
   return (
      
     <div className="container">
@@ -113,7 +125,7 @@ function getCookie(name) {
                   <button onClick={() => startEdit(task)} className="btn btn-sm btn-outline-info">Edit</button>
                 </div>
                 <div style={{flex:1}}>  
-                  <button className="btn btn-sm btn-outline-dark delete">X</button>
+                  <button onClick={() => deleteItem(task)} className="btn btn-sm btn-outline-dark delete">X</button>
                 </div>
               </div>
             )
