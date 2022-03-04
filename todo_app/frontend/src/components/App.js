@@ -1,38 +1,26 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from '../logo.svg';
+import '../App.css';
 import React, { useState,useEffect  } from 'react';
+import { NavLink, Navigate } from 'react-router-dom';
+import axiosInstance from '../axios';
 
 function App() {
   const [todoList, setTodoList] = useState([]);
-  const [activeItem, setActiveItem] = React.useState({ 
+  const user = localStorage.getItem('user');
+  var uncompletedTasks = todoList.filter(item => item.completed == false).length
+  const [activeItem, setActiveItem] = React.useState({
     id: null, title: '',completed:false
   });
   const [editing, setEditing] = useState(false);
+  
 
   useEffect(() => {
     fetchTasks()
   }, []);
 
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}  
-
   function fetchTasks (){
-    console.log("Fetching...")
-    fetch('http://127.0.0.1:8000/api/task-list')
-    .then(response => response.json())
+    axiosInstance.get(`/task-list/`)
+    .then(response => response.data)
     .then(data => 
       setTodoList(data.reverse()))
   }
@@ -40,8 +28,6 @@ function getCookie(name) {
   function handleChange(e){
     var name = e.target.name
     var value = e.target.value
-    console.log('Name:',name)
-    console.log('Value:',value)
     
     setActiveItem({
         ...activeItem,
@@ -51,31 +37,22 @@ function getCookie(name) {
 
   function handleSubmit(e){
     e.preventDefault()
-    console.log('ITEM:', activeItem)
-    var csrftoken = getCookie('csrftoken')
-
-    var url = "http://127.0.0.1:8000/api/task-create/"
+    var url = `task-create/`
 
     if(editing == true){
-      url = `http://127.0.0.1:8000/api/task-update/${activeItem.id}/`
+      url = `task-update/${activeItem.id}/`
       setEditing(false)
     }
 
-    fetch(url, {
-      method:'POST',
-      headers:{
-        'Content-type':'application/json',
-        'X-CSRFToken':csrftoken,
-      },
-      body:JSON.stringify(activeItem)
-    }).then((response) => {
+    axiosInstance.post(url,activeItem)
+      .then((response) => {
       fetchTasks()
       setActiveItem({ 
-        id: null, title: '',completed:false
+       id: null, title: '',completed:false
       })
-    }).catch(function(error){
+      }).catch(function(error){
       console.log('ERROR:',error)
-    })
+      })
 
   }
 
@@ -85,40 +62,32 @@ function getCookie(name) {
   }
 
   function deleteItem(task){
-    var csrftoken = getCookie('csrftoken')
-
-    fetch( `http://127.0.0.1:8000/api/task-delete/${task.id}/`,{
-      method:'DELETE',
-      headers:{
-        'Content-type':'application/json',
-        'X-CSRFToken':csrftoken,
-      }
-    }).then((response) => { fetchTasks()})
+    axiosInstance.delete(`/task-delete/${task.id}/`)
+    .then(() => {fetchTasks()})
   }
 
   function strikeUnstrike(task){
     task.completed = !task.completed
-    console.log('TASK:',task.completed)
-    var csrftoken = getCookie('csrftoken')
-    var url = `http://127.0.0.1:8000/api/task-update/${task.id}/`
 
-    fetch(url, {
-      method:'POST',
-      headers:{
-        'Content-type':'application/json',
-        'X-CSRFToken':csrftoken,
-      },
-      body:JSON.stringify({'completed':task.completed, 'title':task.title})
-    }).then(() => {fetchTasks()})
-
-
+    axiosInstance.post(`task-update/${task.id}/`, {'completed':task.completed, 'title':task.title})
+    .then(() => {fetchTasks()})
   }
 
+  if (localStorage.getItem("access_token") === null) { 
+    return (
+      <Navigate to='/login' />
+    )
+  }
   return (
-     
+    <>
+    <nav className="navbar navbar-light bg-white">
+      <a className="navbar-brand">Hi, {user} you have {uncompletedTasks} pending tasks.</a>
+      <NavLink to={'logout/'}>
+        <button className="btn btn-outline-danger my-2 my-sm-0" href="#" type="button">Logout</button>
+      </NavLink>
+    </nav> 
     <div className="container">
       <div id="task-container">
-
         <div id="form-wrapper">
           <form onSubmit={handleSubmit} id="form">
             <div className="flex-wrapper">
@@ -156,7 +125,9 @@ function getCookie(name) {
       </div>
      
     </div>
+    </>
   );
 }
+
 
 export default App;

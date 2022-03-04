@@ -1,7 +1,8 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import status
 from .serializers import TaskSerializer
 from .models import Task
 
@@ -19,7 +20,8 @@ def apiOverview(request):
 
 @api_view(['GET'])
 def taskList(request):
-    tasks = Task.objects.all()
+    user = request.user
+    tasks = Task.objects.filter(user=user)
     serializer = TaskSerializer(tasks, many=True)
     return Response(serializer.data)
 
@@ -32,10 +34,12 @@ def taskDetail(request, pk):
 @api_view(['POST'])
 def taskCreate(request):
     serializer = TaskSerializer(data=request.data)
-
     if serializer.is_valid():
-        serializer.save()
-    return Response(serializer.data)
+        serializer.save(user=request.user)
+        return Response(serializer.data)
+    else:
+        emessage=serializer.errors
+        return Response({'message':emessage, 'request':request.data})
 
 @api_view(['POST'])
 def taskUpdate(request, pk):
