@@ -10,10 +10,13 @@ function Register(){
     const [password1, setPassword1] = useState('');
     const [password2, setPassword2] = useState('');
     const [invalidPassword, setInvalidPassword] = useState(false);
+    const [registerError, setRegisterError] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit= (e) => {
         e.preventDefault();
+        setRegisterError(false)
+        setInvalidPassword(false)
         if(password1==password2){
             e.preventDefault()
             axiosInstance.post(`user/create/`,{
@@ -21,10 +24,14 @@ function Register(){
                 password: password1,
             })
             .then((res) => {
+                alert("Your user was successfully registered!"); 
                 navigate('/login');
                 console.log(res);
-                console.log(res.data);
             })
+            .catch((err) => {
+                console.log(err);
+                setRegisterError(true)
+            });
         }else{
             setInvalidPassword(true)
         }
@@ -65,6 +72,13 @@ function Register(){
                             <div>
                                 <Alert key="danger" variant="danger">
                                     Those passwords didn’t match. Try again.
+                                </Alert>
+                            </div>
+                        }
+                        {registerError && 
+                            <div>
+                                <Alert key="danger" variant="danger">
+                                    This user is already registered. Please change your username.
                                 </Alert>
                             </div>
                         }

@@ -1,4 +1,4 @@
-import React, { useState,useEffect  } from 'react';
+import React, { useState } from 'react';
 import '../App.css';
 import axiosInstance from '../axios'
 import Alert from 'react-bootstrap/Alert';
@@ -39,7 +39,8 @@ function Login(){
 
                     <div className="mb-md-5 mt-md-4 pb-5">
 
-                    <h2 className="fw-bold mb-2 text-uppercase">Login</h2>
+                    <h1 className="fw-bold mb-3 text"> Tasker </h1>
+                    <h3 className="fw mb-2 text-uppercase">Login</h3>
                     <p className="text-dark-50 mb-5">Please enter your username and password!</p>
                     <form onSubmit={handleSubmit}>
                         <div className="form-outline form-white mb-4">

@@ -1,10 +1,10 @@
 import axios from "axios";
 
-const baseUrl = "http://127.0.0.1:8000/api"
+const baseUrl = "https://wolfapitasker.herokuapp.com/api"
 
 const axiosInstance = axios.create({
     baseURL:baseUrl,
-    timeout:5000,
+    timeout:20000,
     headers: {
         Authorization: localStorage.getItem('access_token')
             ? 'JWT ' + localStorage.getItem('access_token')
@@ -83,6 +83,5 @@ axiosInstance.interceptors.response.use(
 		return Promise.reject(error);
 	}
 );
-
 
 export default axiosInstance;
