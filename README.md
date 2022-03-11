@@ -12,3 +12,7 @@ Server hosted at:
 :link: https://wolfapitasker.herokuapp.com/api/
 
 
+### Register page
+To use Tasker you'll have to create an user first
+
+![](https://github.com/JS-Wolf/todo_app/blob/master/images/register.PNG)
