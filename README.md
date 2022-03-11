@@ -30,7 +30,7 @@ To add a task simply type the name in the add bar and press enter.
 You can mark a task as completed by clicking its name.
 ![](https://github.com/JS-Wolf/todo_app/blob/master/images/crosstask.PNG)
 
-You also can update your current tasks by pressing the update button.
+You also can update your current tasks by pressing the edit button.
 ![](https://github.com/JS-Wolf/todo_app/blob/master/images/updatetask1.PNG)
 ![](https://github.com/JS-Wolf/todo_app/blob/master/images/updatetask2.PNG)
 
